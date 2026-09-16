@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: devops_sentinel_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: devops_sentinel
+      POSTGRES_USER: sentinel_user
+      POSTGRES_PASSWORD: sentinel_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel_user -d devops_sentinel"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: devops_sentinel_mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web Dashboard
+    environment:
+      MP_MAX_MESSAGES: 500
+
+volumes:
+  postgres_data:
+    name: devops_sentinel_postgres_data
