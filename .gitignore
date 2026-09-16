@@ -1,0 +1,21 @@
+# Nix
+result
+result-*
+.direnv/
+
+# PHP / Composer
+vendor/
+.env
+.env.local
+.phpunit.result.cache
+
+# Go / WASM builds
+bin/
+*.exe
+*.test
+
+# OS & IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
