@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwt' => \App\Http\Middleware\KiemTraJwt::class,
             'role' => \App\Http\Middleware\KiemTraVaiTro::class,
+            'webhook.hmac' => \App\Http\Middleware\XacThucWebhookHmac::class,
+            'audit' => \App\Http\Middleware\GhiNhatKyHoatDong::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
