@@ -83,3 +83,35 @@ type PhanTrangMeta struct {
 	Total      int `json:"total"`
 	TotalPages int `json:"total_pages"`
 }
+
+/**
+ * Cấu trúc thông tin người tạo dự án.
+ */
+type ThongTinNguoiTao struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+/**
+ * Cấu trúc chi tiết đầy đủ của một dự án kèm thông tin cấu hình webhook.
+ */
+type ThongTinDuAnChiTiet struct {
+	ID                int64             `json:"id"`
+	TeamID            *int64            `json:"team_id"`
+	Name              string            `json:"name"`
+	Slug              string            `json:"slug"`
+	Description       string            `json:"description"`
+	RepositoryURL     string            `json:"repository_url"`
+	CIProvider        string            `json:"ci_provider"`
+	WebhookSecret     string            `json:"webhook_secret"`
+	WebhookURL        string            `json:"webhook_url"`
+	FailureThreshold  int               `json:"failure_threshold"`
+	CreatedAt         string            `json:"created_at"`
+	UpdatedAt         string            `json:"updated_at"`
+	NhomSoHuu         *ThongTinNhomNho  `json:"nhom_so_huu"`
+	NguoiTao          *ThongTinNguoiTao `json:"nguoi_tao"`
+	LuotChayMoiNhat   *ThongTinLuotChay `json:"luot_chay_moi_nhat"`
+	ActiveAlertsCount int               `json:"active_alerts_count"`
+}
+

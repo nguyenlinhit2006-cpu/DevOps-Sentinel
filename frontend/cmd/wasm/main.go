@@ -46,6 +46,21 @@ func main() {
 		views.HienThiTrangBangDieuKhien()
 	})
 
+	// 4. Tuyến Danh sách Quản lý Dự án
+	bdh.DangKy("#/projects", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangDanhSachDuAn()
+	})
+
+	// 5. Tuyến Chi tiết Dự án (kèm ID động)
+	bdh.DangKy("#/projects/{id}", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangChiTietDuAn(thamSo["id"])
+	})
+
+	// 6. Tuyến Chi tiết 1 Lượt chạy Pipeline (kèm ID động)
+	bdh.DangKy("#/runs/{id}", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangChiTietLuotChay(thamSo["id"])
+	})
+
 	// Tuyến mặc định gốc "#"
 	bdh.DangKy("#", func(duongDan string, thamSo map[string]string) {
 		routing.ChuyenHuong("#/dashboard")
