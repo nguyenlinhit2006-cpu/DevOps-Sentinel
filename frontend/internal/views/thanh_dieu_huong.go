@@ -105,7 +105,7 @@ func TaoThanhDieuHuong(tabHienTai string) dom.PhanTu {
 		</div>
 	`, lopTabDashboard, lopTabProjects, lopTabAlerts, lopTabTeams,
 		lopPolling, chuoiPolling,
-		strings.ToUpper(string([]rune(tenNguoiDung)[0])),
+		layChuCaiDau(tenNguoiDung),
 		tenNguoiDung, lopVaiTro, tenHienThiVaiTro))
 
 	// Đăng ký sự kiện toggle polling
@@ -137,4 +137,15 @@ func TaoThanhDieuHuong(tabHienTai string) dom.PhanTu {
 	}
 
 	return thanhNav
+}
+
+/**
+ * Trích xuất an toàn chữ cái đầu của tên người dùng để hiển thị Avatar.
+ */
+func layChuCaiDau(ten string) string {
+	runes := []rune(strings.TrimSpace(ten))
+	if len(runes) > 0 {
+		return strings.ToUpper(string(runes[0]))
+	}
+	return "U"
 }

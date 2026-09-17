@@ -3,6 +3,7 @@
 package routing
 
 import (
+	"fmt"
 	"strings"
 	"syscall/js"
 
@@ -55,12 +56,16 @@ func (bdh *BoDieuHuong) DangKyKhongTimThay(hamXuLy HamXuLyTuyenDuong) {
 
 /**
  * Chuyển hướng người dùng sang một đường dẫn Hash mới.
+ * Đồng thời kích hoạt trực tiếp điều phối tuyến đường để giao diện phản hồi tức thì 100%.
  */
 func ChuyenHuong(duongDanHash string) {
 	if !strings.HasPrefix(duongDanHash, "#") {
 		duongDanHash = "#" + duongDanHash
 	}
 	dom.LayCuaSo().GiaTri.Get("location").Set("hash", duongDanHash)
+	if BoDieuHuongDonNhat != nil {
+		BoDieuHuongDonNhat.DieuPhoi()
+	}
 }
 
 /**
@@ -76,16 +81,42 @@ func LayDuongDanHienTai() string {
 
 /**
  * Khởi chạy bộ lắng nghe sự kiện thay đổi hash (hashchange) của trình duyệt.
+ * Kèm bộ lắng nghe click toàn cục để phản hồi nhấp chuột ngay lập tức không bị trễ.
  */
 func (bdh *BoDieuHuong) KhoiChay() {
 	cuaSo := dom.LayCuaSo()
 
-	hamLangNghe := js.FuncOf(func(this js.Value, args []js.Value) any {
+	hamLangNgheHash := js.FuncOf(func(this js.Value, args []js.Value) any {
 		bdh.DieuPhoi()
 		return nil
 	})
+	cuaSo.GiaTri.Call("addEventListener", "hashchange", hamLangNgheHash)
 
-	cuaSo.GiaTri.Call("addEventListener", "hashchange", hamLangNghe)
+	// Lắng nghe click toàn cục trên document cho mọi thẻ liên kết có href dạng hash
+	taiLieu := dom.LayTaiLieu()
+	hamLangNgheClick := js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) == 0 || args[0].IsNull() || args[0].IsUndefined() {
+			return nil
+		}
+		e := args[0]
+		target := e.Get("target")
+		if target.IsNull() || target.IsUndefined() {
+			return nil
+		}
+
+		theA := target.Call("closest", "a[href^='#']")
+		if !theA.IsNull() && !theA.IsUndefined() {
+			hrefVal := theA.Call("getAttribute", "href")
+			if !hrefVal.IsNull() && !hrefVal.IsUndefined() {
+				href := hrefVal.String()
+				if href != "" && strings.HasPrefix(href, "#") {
+					ChuyenHuong(href)
+				}
+			}
+		}
+		return nil
+	})
+	taiLieu.GiaTri.Call("addEventListener", "click", hamLangNgheClick)
 
 	// Điều phối tuyến đường ngay khi vừa tải trang
 	bdh.DieuPhoi()
@@ -95,6 +126,18 @@ func (bdh *BoDieuHuong) KhoiChay() {
  * Phân tích URL hash hiện tại, kiểm tra đăng nhập và gọi hàm xử lý tương ứng.
  */
 func (bdh *BoDieuHuong) DieuPhoi() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("⚠️ [Router] Bắt lỗi ngoại lệ khi điều phối tuyến đường: %v\n", r)
+		}
+	}()
+
+	// Cuộn trang lên đầu mỗi khi chuyển màn hình
+	cuaSo := dom.LayCuaSo()
+	if cuaSo.HopLe() {
+		cuaSo.GiaTri.Call("scrollTo", 0, 0)
+	}
+
 	duongDan := LayDuongDanHienTai()
 	tt := state.LayTrangThai()
 

@@ -130,10 +130,24 @@ func HienThiTrangDangNhap() {
 		}()
 	}
 
-	dom.LayPhanTuTheoId("btn-dang-nhap").GanSuKien("click", func(this js.Value, args []js.Value) any {
-		xuLyDangNhap()
-		return nil
-	})
+	nutDangNhap := dom.LayPhanTuTheoId("btn-dang-nhap")
+	if nutDangNhap.HopLe() {
+		nutDangNhap.GanSuKien("click", func(this js.Value, args []js.Value) any {
+			xuLyDangNhap()
+			return nil
+		})
+	}
+
+	formDangNhap := dom.LayPhanTuTheoId("form-dang-nhap")
+	if formDangNhap.HopLe() {
+		formDangNhap.GanSuKien("submit", func(this js.Value, args []js.Value) any {
+			if len(args) > 0 && !args[0].IsNull() && !args[0].IsUndefined() {
+				args[0].Call("preventDefault")
+			}
+			xuLyDangNhap()
+			return nil
+		})
+	}
 }
 
 /**

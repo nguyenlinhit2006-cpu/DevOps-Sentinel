@@ -3,6 +3,7 @@
 package dom
 
 import (
+	"fmt"
 	"syscall/js"
 )
 
@@ -157,9 +158,17 @@ func (pt PhanTu) XoaLopCss(danhSachLop ...string) PhanTu {
 
 /**
  * Lắng nghe và gắn sự kiện tương tác người dùng (click, submit, change...).
+ * Tự động bọc bộ bắt lỗi (recover) để không làm sập Go WebAssembly runtime khi xảy ra ngoại lệ.
  */
 func (pt PhanTu) GanSuKien(tenSuKien string, hamXuLy func(this js.Value, args []js.Value) any) js.Func {
-	hamJs := js.FuncOf(hamXuLy)
+	hamJs := js.FuncOf(func(this js.Value, args []js.Value) any {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("⚠️ [DOM Event] Bắt lỗi ngoại lệ trong sự kiện '%s': %v\n", tenSuKien, r)
+			}
+		}()
+		return hamXuLy(this, args)
+	})
 	if pt.HopLe() {
 		pt.GiaTri.Call("addEventListener", tenSuKien, hamJs)
 	}

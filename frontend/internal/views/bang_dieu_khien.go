@@ -118,77 +118,8 @@ func veGiaoDienTongQuan(khungNoiDung dom.PhanTu, tk *api.ThongKeBangDieuKhien, d
 	}
 
 	// 2. Bốn Thẻ Chỉ số KPI Tổng quan (KPI Metrics Cards)
-	theKpiContainer := dom.TaoPhanTu("div").ThemLopCss("kpi-grid")
-
-	// Xác định màu sắc và biểu tượng cho tỷ lệ thành công
-	mauTyLe := "rate-high"
-	if tk.SuccessRatePercent < 70 {
-		mauTyLe = "rate-low"
-	} else if tk.SuccessRatePercent < 90 {
-		mauTyLe = "rate-medium"
-	}
-
-	// Xác định trạng thái cảnh báo
-	theCanhBaoHtml := `<span class="badge badge-success-subtle">Hệ thống ổn định</span>`
-	lopCanhBaoCard := ""
-	if tk.ActiveAlertsCount > 0 {
-		theCanhBaoHtml = fmt.Sprintf(`<span class="badge badge-danger-subtle"><span class="pulse-dot"></span> %d Cảnh báo đang mở</span>`, tk.ActiveAlertsCount)
-		lopCanhBaoCard = "card-alert-danger"
-	}
-
-	theKpiContainer.DatHtml(fmt.Sprintf(`
-		<!-- Thẻ 1: Tổng số dự án -->
-		<div class="card kpi-card">
-			<div class="kpi-header">
-				<span class="kpi-label">Tổng số Dự án</span>
-				<div class="kpi-icon-wrap icon-projects">📁</div>
-			</div>
-			<div class="kpi-value">%d</div>
-			<div class="kpi-footer">
-				<span class="text-muted">Dự án được giám sát liên tục</span>
-			</div>
-		</div>
-
-		<!-- Thẻ 2: Lượt chạy hôm nay -->
-		<div class="card kpi-card">
-			<div class="kpi-header">
-				<span class="kpi-label">Lượt chạy hôm nay</span>
-				<div class="kpi-icon-wrap icon-runs">🚀</div>
-			</div>
-			<div class="kpi-value">%d</div>
-			<div class="kpi-footer">
-				<span class="text-muted">Tổng tích lũy: <strong>%d</strong> lượt build</span>
-			</div>
-		</div>
-
-		<!-- Thẻ 3: Tỷ lệ thành công -->
-		<div class="card kpi-card">
-			<div class="kpi-header">
-				<span class="kpi-label">Tỷ lệ Thành công</span>
-				<div class="kpi-icon-wrap icon-rate">📈</div>
-			</div>
-			<div class="kpi-value %s">%.1f%%</div>
-			<div class="kpi-footer">
-				<div class="progress-bar-bg">
-					<div class="progress-bar-fill %s" style="width: %.1f%%;"></div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Thẻ 4: Cảnh báo Sentinel -->
-		<div class="card kpi-card %s">
-			<div class="kpi-header">
-				<span class="kpi-label">Cảnh báo Sentinel</span>
-				<div class="kpi-icon-wrap icon-alerts">🚨</div>
-			</div>
-			<div class="kpi-value">%d</div>
-			<div class="kpi-footer">
-				%s
-			</div>
-		</div>
-	`, tk.TotalProjects, tk.TotalRunsToday, tk.TotalRuns,
-		mauTyLe, tk.SuccessRatePercent, mauTyLe, tk.SuccessRatePercent,
-		lopCanhBaoCard, tk.ActiveAlertsCount, theCanhBaoHtml))
+	theKpiContainer := dom.TaoPhanTu("div").ThemLopCss("kpi-grid").DatId("dashboard-kpi-grid")
+	theKpiContainer.DatHtml(renderKpiHtml(tk))
 	khungNoiDung.ThemCon(theKpiContainer)
 
 	// 3. Khung phân chia 2 phân vùng chính (Lưới dự án & Hoạt động gần đây)
@@ -526,26 +457,97 @@ func rutGonUrl(url string) string {
 }
 
 /**
+ * Tạo nội dung HTML cho 4 thẻ KPI chỉ số tổng quan.
+ */
+func renderKpiHtml(tk *api.ThongKeBangDieuKhien) string {
+	mauTyLe := "rate-high"
+	if tk.SuccessRatePercent < 70 {
+		mauTyLe = "rate-low"
+	} else if tk.SuccessRatePercent < 90 {
+		mauTyLe = "rate-medium"
+	}
+
+	theCanhBaoHtml := `<span class="badge badge-success-subtle">Hệ thống ổn định</span>`
+	lopCanhBaoCard := ""
+	if tk.ActiveAlertsCount > 0 {
+		theCanhBaoHtml = fmt.Sprintf(`<span class="badge badge-danger-subtle"><span class="pulse-dot"></span> %d Cảnh báo đang mở</span>`, tk.ActiveAlertsCount)
+		lopCanhBaoCard = "card-alert-danger"
+	}
+
+	return fmt.Sprintf(`
+		<!-- Thẻ 1: Tổng số dự án -->
+		<div class="card kpi-card">
+			<div class="kpi-header">
+				<span class="kpi-label">Tổng số Dự án</span>
+				<div class="kpi-icon-wrap icon-projects">📁</div>
+			</div>
+			<div class="kpi-value">%d</div>
+			<div class="kpi-footer">
+				<span class="text-muted">Dự án được giám sát liên tục</span>
+			</div>
+		</div>
+
+		<!-- Thẻ 2: Lượt chạy hôm nay -->
+		<div class="card kpi-card">
+			<div class="kpi-header">
+				<span class="kpi-label">Lượt chạy hôm nay</span>
+				<div class="kpi-icon-wrap icon-runs">🚀</div>
+			</div>
+			<div class="kpi-value">%d</div>
+			<div class="kpi-footer">
+				<span class="text-muted">Tổng tích lũy: <strong>%d</strong> lượt build</span>
+			</div>
+		</div>
+
+		<!-- Thẻ 3: Tỷ lệ thành công -->
+		<div class="card kpi-card">
+			<div class="kpi-header">
+				<span class="kpi-label">Tỷ lệ Thành công</span>
+				<div class="kpi-icon-wrap icon-rate">📈</div>
+			</div>
+			<div class="kpi-value %s">%.1f%%</div>
+			<div class="kpi-footer">
+				<div class="progress-bar-bg">
+					<div class="progress-bar-fill %s" style="width: %.1f%%;"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Thẻ 4: Cảnh báo Sentinel -->
+		<div class="card kpi-card %s">
+			<div class="kpi-header">
+				<span class="kpi-label">Cảnh báo Sentinel</span>
+				<div class="kpi-icon-wrap icon-alerts">🚨</div>
+			</div>
+			<div class="kpi-value">%d</div>
+			<div class="kpi-footer">
+				%s
+			</div>
+		</div>
+	`, tk.TotalProjects, tk.TotalRunsToday, tk.TotalRuns,
+		mauTyLe, tk.SuccessRatePercent, mauTyLe, tk.SuccessRatePercent,
+		lopCanhBaoCard, tk.ActiveAlertsCount, theCanhBaoHtml)
+}
+
+/**
  * Làm mới dữ liệu Dashboard một cách êm dịu (dành cho bộ realtime polling 4s ngầm).
- * Cập nhật lại số liệu khi người dùng đang ở trang Dashboard mà không làm gián đoạn trải nghiệm.
+ * Cập nhật lại số liệu KPI tại chỗ (in-place) mà không hủy DOM, không làm gián đoạn tương tác người dùng.
  */
 func LamMoiBangDieuKhienYenLang() {
-	khungNoiDung := dom.LayPhanTuTheoId("dashboard-content")
-	if !khungNoiDung.HopLe() {
+	kpiGrid := dom.LayPhanTuTheoId("dashboard-kpi-grid")
+	if !kpiGrid.HopLe() {
 		return
 	}
 
 	go func() {
+		defer func() { _ = recover() }()
 		thongKe, errThongKe := api.LayThongKeBangDieuKhien()
 		if errThongKe != nil {
 			return
 		}
-		danhSachDuAn, _, errDuAn := api.LayDanhSachDuAn("", 1, 30)
-		if errDuAn != nil {
-			return
+		if kpiGrid.HopLe() {
+			kpiGrid.DatHtml(renderKpiHtml(thongKe))
 		}
-
-		veGiaoDienTongQuan(khungNoiDung, thongKe, danhSachDuAn, nil)
 	}()
 }
 

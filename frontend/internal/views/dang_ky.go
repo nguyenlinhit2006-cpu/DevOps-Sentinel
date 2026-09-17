@@ -85,7 +85,7 @@ func HienThiTrangDangKy() {
 	khungChinh.ThemCon(theContainer)
 
 	// Xử lý sự kiện đăng ký
-	dom.LayPhanTuTheoId("btn-dang-ky").GanSuKien("click", func(this js.Value, args []js.Value) any {
+	xuLyDangKy := func() {
 		ten := strings.TrimSpace(dom.LayPhanTuTheoId("input-name").LayGiaTri())
 		email := strings.TrimSpace(dom.LayPhanTuTheoId("input-email").LayGiaTri())
 		matKhau := dom.LayPhanTuTheoId("input-password").LayGiaTri()
@@ -93,17 +93,17 @@ func HienThiTrangDangKy() {
 
 		if ten == "" || email == "" || matKhau == "" {
 			hienThiThongBaoAuth("error", "Vui lòng điền đầy đủ các thông tin bắt buộc.")
-			return nil
+			return
 		}
 
 		if len(matKhau) < 6 {
 			hienThiThongBaoAuth("error", "Mật khẩu phải có độ dài tối thiểu 6 ký tự.")
-			return nil
+			return
 		}
 
 		if matKhau != xacNhan {
 			hienThiThongBaoAuth("error", "Mật khẩu xác nhận không trùng khớp. Vui lòng kiểm tra lại.")
-			return nil
+			return
 		}
 
 		nutDangKy := dom.LayPhanTuTheoId("btn-dang-ky")
@@ -121,6 +121,24 @@ func HienThiTrangDangKy() {
 				routing.ChuyenHuong("#/dashboard")
 			}
 		}()
-		return nil
-	})
+	}
+
+	nutDangKy := dom.LayPhanTuTheoId("btn-dang-ky")
+	if nutDangKy.HopLe() {
+		nutDangKy.GanSuKien("click", func(this js.Value, args []js.Value) any {
+			xuLyDangKy()
+			return nil
+		})
+	}
+
+	formDangKy := dom.LayPhanTuTheoId("form-dang-ky")
+	if formDangKy.HopLe() {
+		formDangKy.GanSuKien("submit", func(this js.Value, args []js.Value) any {
+			if len(args) > 0 && !args[0].IsNull() && !args[0].IsUndefined() {
+				args[0].Call("preventDefault")
+			}
+			xuLyDangKy()
+			return nil
+		})
+	}
 }

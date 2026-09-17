@@ -12,6 +12,12 @@ import (
  */
 func KhoiDongPollingRealtime(hamCapNhat func(duongDanHienTai string)) {
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// Bảo vệ goroutine polling không bao giờ làm gián đoạn chương trình
+			}
+		}()
+
 		conDem := time.NewTicker(4 * time.Second)
 		defer conDem.Stop()
 
@@ -22,7 +28,12 @@ func KhoiDongPollingRealtime(hamCapNhat func(duongDanHienTai string)) {
 			}
 
 			if hamCapNhat != nil {
-				hamCapNhat("")
+				func() {
+					defer func() {
+						_ = recover()
+					}()
+					hamCapNhat("")
+				}()
 			}
 		}
 	}()
