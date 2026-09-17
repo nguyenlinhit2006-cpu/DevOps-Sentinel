@@ -22,6 +22,7 @@ type PhanHoiChuan struct {
 	Data    json.RawMessage `json:"data"`
 	Message string          `json:"message"`
 	Error   *ThongTinLoi    `json:"error"`
+	Meta    *PhanTrangMeta  `json:"meta"`
 }
 
 type ThongTinLoi struct {

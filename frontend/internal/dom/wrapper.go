@@ -165,3 +165,35 @@ func (pt PhanTu) GanSuKien(tenSuKien string, hamXuLy func(this js.Value, args []
 	}
 	return hamJs
 }
+
+/**
+ * Đặt thuộc tính ID cho phần tử DOM.
+ */
+func (pt PhanTu) DatId(id string) PhanTu {
+	if pt.HopLe() {
+		pt.GiaTri.Set("id", id)
+	}
+	return pt
+}
+
+/**
+ * Xóa một thuộc tính (attribute) khỏi phần tử DOM.
+ */
+func (pt PhanTu) XoaThuocTinh(tenThuocTinh string) PhanTu {
+	if pt.HopLe() {
+		pt.GiaTri.Call("removeAttribute", tenThuocTinh)
+	}
+	return pt
+}
+
+/**
+ * Tìm phần tử con đầu tiên khớp với bộ chọn CSS (querySelector).
+ */
+func (pt PhanTu) Tim(cssSelector string) PhanTu {
+	if pt.HopLe() {
+		kq := pt.GiaTri.Call("querySelector", cssSelector)
+		return PhanTu{GiaTri: kq}
+	}
+	return PhanTu{}
+}
+

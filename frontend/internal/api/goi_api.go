@@ -5,6 +5,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"devops-sentinel/frontend/internal/state"
 )
@@ -128,3 +129,65 @@ func KiemTraSucKhoe() (string, error) {
 	}
 	return phanHoi.Message, nil
 }
+
+/**
+ * Lấy các chỉ số thống kê tóm tắt cho Bảng điều khiển (Dashboard).
+ */
+func LayThongKeBangDieuKhien() (*ThongKeBangDieuKhien, error) {
+	kh := LayKhachHangApi()
+	phanHoi, _, err := kh.GuiYeuCau("GET", "/dashboard/summary", nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không thể lấy thông tin thống kê bảng điều khiển")
+	}
+
+	var ketQua ThongKeBangDieuKhien
+	if err := json.Unmarshal(phanHoi.Data, &ketQua); err != nil {
+		return nil, err
+	}
+
+	return &ketQua, nil
+}
+
+/**
+ * Lấy danh sách dự án kèm phân trang và tìm kiếm.
+ */
+func LayDanhSachDuAn(tuKhoa string, trang int, soLuong int) ([]ThongTinDuAn, *PhanTrangMeta, error) {
+	kh := LayKhachHangApi()
+	if trang <= 0 {
+		trang = 1
+	}
+	if soLuong <= 0 {
+		soLuong = 20
+	}
+	duongDan := fmt.Sprintf("/projects?page=%d&per_page=%d", trang, soLuong)
+	if tuKhoa != "" {
+		duongDan += fmt.Sprintf("&search=%s", tuKhoa)
+	}
+
+	phanHoi, _, err := kh.GuiYeuCau("GET", duongDan, nil, true)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, nil, errors.New("không thể lấy danh sách dự án")
+	}
+
+	var danhSach []ThongTinDuAn
+	if err := json.Unmarshal(phanHoi.Data, &danhSach); err != nil {
+		return nil, nil, err
+	}
+
+	return danhSach, phanHoi.Meta, nil
+}
+

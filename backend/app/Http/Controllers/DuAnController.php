@@ -32,7 +32,7 @@ class DuAnController extends Controller
 
         $truyVan = DuAn::with([
             'nhomSoHuu:id,name',
-            'luotChayMoiNhat:id,project_id,status,branch,commit_hash,duration_seconds,created_at',
+            'luotChayMoiNhat',
         ])->withCount(['danhSachCanhBaoDangMo as active_alerts_count']);
 
         if ($tuKhoa) {
