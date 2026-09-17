@@ -115,3 +115,63 @@ type ThongTinDuAnChiTiet struct {
 	ActiveAlertsCount int               `json:"active_alerts_count"`
 }
 
+/**
+ * Cấu trúc thông tin cảnh báo sự cố Sentinel (Alert).
+ */
+type ThongTinCanhBao struct {
+	ID                  int64             `json:"id"`
+	ProjectID           int64             `json:"project_id"`
+	LastPipelineRunID   *int64            `json:"last_pipeline_run_id"`
+	Title               string            `json:"title"`
+	Message             string            `json:"message"`
+	ConsecutiveFailures int               `json:"consecutive_failures"`
+	Status              string            `json:"status"` // active, resolved
+	ResolvedBy          *int64            `json:"resolved_by"`
+	ResolvedAt          *string           `json:"resolved_at"`
+	CreatedAt           string            `json:"created_at"`
+	UpdatedAt           string            `json:"updated_at"`
+	DuAn                *ThongTinDuAnNho  `json:"du_an"`
+	LuotChayLoi         *ThongTinLuotChay `json:"luot_chay_loi"`
+	NguoiXuLy           *ThongTinNguoiTao `json:"nguoi_xu_ly"`
+}
+
+/**
+ * Cấu trúc thông tin nhóm làm việc tóm tắt trong danh sách.
+ */
+type ThongTinNhom struct {
+	ID            int64             `json:"id"`
+	Name          string            `json:"name"`
+	Description   string            `json:"description"`
+	CreatedBy     *int64            `json:"created_by"`
+	CreatedAt     string            `json:"created_at"`
+	UpdatedAt     string            `json:"updated_at"`
+	MembersCount  int               `json:"members_count"`
+	ProjectsCount int               `json:"projects_count"`
+	NguoiTao      *ThongTinNguoiTao `json:"nguoi_tao"`
+}
+
+/**
+ * Cấu trúc thông tin thành viên trong nhóm kèm vai trò.
+ */
+type ThongTinThanhVien struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"` // team_lead, viewer
+}
+
+/**
+ * Cấu trúc thông tin chi tiết một nhóm kèm danh sách thành viên và dự án trực thuộc.
+ */
+type ThongTinNhomChiTiet struct {
+	ID                int64               `json:"id"`
+	Name              string              `json:"name"`
+	Description       string              `json:"description"`
+	CreatedBy         *int64              `json:"created_by"`
+	CreatedAt         string              `json:"created_at"`
+	NguoiTao          *ThongTinNguoiTao   `json:"nguoi_tao"`
+	DanhSachThanhVien []ThongTinThanhVien `json:"danh_sach_thanh_vien"`
+	DanhSachDuAn      []ThongTinDuAn      `json:"danh_sach_du_an"`
+}
+
+

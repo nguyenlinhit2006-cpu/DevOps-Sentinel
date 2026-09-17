@@ -49,6 +49,17 @@ func TaoThanhDieuHuong(tabHienTai string) dom.PhanTu {
 	if tabHienTai == "alerts" {
 		lopTabAlerts = "active"
 	}
+	lopTabTeams := ""
+	if tabHienTai == "teams" {
+		lopTabTeams = "active"
+	}
+
+	chuoiPolling := `<span class="pulse-dot-live"></span> Live (4s)`
+	lopPolling := "badge-live"
+	if !tt.PollingKichHoat {
+		chuoiPolling = `⏸️ Tạm dừng`
+		lopPolling = "badge-live paused"
+	}
 
 	thanhNav := dom.TaoPhanTu("header").ThemLopCss("app-navbar")
 	thanhNav.DatHtml(fmt.Sprintf(`
@@ -71,14 +82,16 @@ func TaoThanhDieuHuong(tabHienTai string) dom.PhanTu {
 				<a href="#/alerts" class="nav-link %s">
 					<span class="icon">🚨</span> Cảnh báo
 				</a>
+				<a href="#/teams" class="nav-link %s">
+					<span class="icon">👥</span> Nhóm
+				</a>
 			</nav>
 		</div>
 
 		<div class="nav-user">
-			<div class="user-status-indicator" title="Trạng thái kết nối trực tuyến">
-				<span class="status-pulse"></span>
-				<span class="status-text">Online</span>
-			</div>
+			<button id="btn-toggle-polling" class="badge %s" title="Nhấn để Bật/Tắt tự động cập nhật thời gian thực">
+				%s
+			</button>
 			<div class="user-profile-chip">
 				<div class="user-avatar">%s</div>
 				<div class="user-meta">
@@ -90,9 +103,26 @@ func TaoThanhDieuHuong(tabHienTai string) dom.PhanTu {
 				<span>🚪</span> Đăng xuất
 			</button>
 		</div>
-	`, lopTabDashboard, lopTabProjects, lopTabAlerts,
+	`, lopTabDashboard, lopTabProjects, lopTabAlerts, lopTabTeams,
+		lopPolling, chuoiPolling,
 		strings.ToUpper(string([]rune(tenNguoiDung)[0])),
 		tenNguoiDung, lopVaiTro, tenHienThiVaiTro))
+
+	// Đăng ký sự kiện toggle polling
+	nutTogglePolling := thanhNav.Tim("#btn-toggle-polling")
+	if nutTogglePolling.HopLe() {
+		nutTogglePolling.GanSuKien("click", func(this js.Value, args []js.Value) any {
+			kichHoat := tt.ChuyenDoiPolling()
+			if kichHoat {
+				nutTogglePolling.ThemLopCss("badge-live").XoaLopCss("paused")
+				nutTogglePolling.DatHtml(`<span class="pulse-dot-live"></span> Live (4s)`)
+			} else {
+				nutTogglePolling.ThemLopCss("paused")
+				nutTogglePolling.DatHtml(`⏸️ Tạm dừng`)
+			}
+			return nil
+		})
+	}
 
 	// Đăng ký sự kiện click cho nút Đăng xuất
 	nutDangXuat := thanhNav.Tim("#btn-dang-xuat")

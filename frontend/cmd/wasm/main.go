@@ -8,6 +8,7 @@ import (
 	"devops-sentinel/frontend/internal/api"
 	"devops-sentinel/frontend/internal/dom"
 	"devops-sentinel/frontend/internal/routing"
+	"devops-sentinel/frontend/internal/state"
 	"devops-sentinel/frontend/internal/views"
 )
 
@@ -59,6 +60,34 @@ func main() {
 	// 6. Tuyến Chi tiết 1 Lượt chạy Pipeline (kèm ID động)
 	bdh.DangKy("#/runs/{id}", func(duongDan string, thamSo map[string]string) {
 		views.HienThiTrangChiTietLuotChay(thamSo["id"])
+	})
+
+	// 7. Tuyến Quản lý Cảnh báo Sentinel (Alerts)
+	bdh.DangKy("#/alerts", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangCanhBao()
+	})
+	bdh.DangKy("#/alerts/resolved", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangCanhBao()
+	})
+
+	// 8. Tuyến Quản lý Nhóm làm việc (Teams)
+	bdh.DangKy("#/teams", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangDanhSachNhom()
+	})
+
+	// 9. Tuyến Chi tiết Nhóm làm việc (kèm ID động)
+	bdh.DangKy("#/teams/{id}", func(duongDan string, thamSo map[string]string) {
+		views.HienThiTrangChiTietNhom(thamSo["id"])
+	})
+
+	// Khởi động Bộ máy Polling ngầm thời gian thực (định kỳ 4 giây)
+	state.KhoiDongPollingRealtime(func(duongDanHienTai string) {
+		// Kiểm tra trang đang được gắn trên DOM để tự động cập nhật số liệu
+		if dom.LayPhanTuTheoId("dashboard-content").HopLe() {
+			views.LamMoiBangDieuKhienYenLang()
+		} else if dom.LayPhanTuTheoId("alerts-content").HopLe() {
+			views.LamMoiCanhBaoYenLang()
+		}
 	})
 
 	// Tuyến mặc định gốc "#"

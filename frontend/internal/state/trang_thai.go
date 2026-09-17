@@ -24,6 +24,7 @@ type TrangThaiToanCuc struct {
 	AccessToken      string
 	RefreshToken     string
 	NguoiDungHienTai *ThongTinNguoiDung
+	PollingKichHoat  bool
 }
 
 var trangThaiDonNhat *TrangThaiToanCuc
@@ -33,7 +34,9 @@ var trangThaiDonNhat *TrangThaiToanCuc
  */
 func LayTrangThai() *TrangThaiToanCuc {
 	if trangThaiDonNhat == nil {
-		trangThaiDonNhat = &TrangThaiToanCuc{}
+		trangThaiDonNhat = &TrangThaiToanCuc{
+			PollingKichHoat: true,
+		}
 		trangThaiDonNhat.TaiTuKhoLuuTru()
 	}
 	return trangThaiDonNhat
@@ -124,3 +127,19 @@ func (tt *TrangThaiToanCuc) LaQuanTriVien() bool {
 func (tt *TrangThaiToanCuc) LaTruongNhom() bool {
 	return tt.NguoiDungHienTai != nil && (tt.NguoiDungHienTai.Role == "admin" || tt.NguoiDungHienTai.Role == "team_lead")
 }
+
+/**
+ * Bật hoặc tắt trạng thái tự động polling cập nhật dữ liệu.
+ */
+func (tt *TrangThaiToanCuc) BatTatPolling(bat bool) {
+	tt.PollingKichHoat = bat
+}
+
+/**
+ * Đảo trạng thái bật/tắt của cơ chế polling và trả về trạng thái mới.
+ */
+func (tt *TrangThaiToanCuc) ChuyenDoiPolling() bool {
+	tt.PollingKichHoat = !tt.PollingKichHoat
+	return tt.PollingKichHoat
+}
+

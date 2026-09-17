@@ -524,3 +524,28 @@ func rutGonUrl(url string) string {
 	}
 	return rutGon
 }
+
+/**
+ * Làm mới dữ liệu Dashboard một cách êm dịu (dành cho bộ realtime polling 4s ngầm).
+ * Cập nhật lại số liệu khi người dùng đang ở trang Dashboard mà không làm gián đoạn trải nghiệm.
+ */
+func LamMoiBangDieuKhienYenLang() {
+	khungNoiDung := dom.LayPhanTuTheoId("dashboard-content")
+	if !khungNoiDung.HopLe() {
+		return
+	}
+
+	go func() {
+		thongKe, errThongKe := api.LayThongKeBangDieuKhien()
+		if errThongKe != nil {
+			return
+		}
+		danhSachDuAn, _, errDuAn := api.LayDanhSachDuAn("", 1, 30)
+		if errDuAn != nil {
+			return
+		}
+
+		veGiaoDienTongQuan(khungNoiDung, thongKe, danhSachDuAn, nil)
+	}()
+}
+

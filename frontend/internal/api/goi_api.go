@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"devops-sentinel/frontend/internal/state"
 )
@@ -313,5 +314,245 @@ func TaoLaiWebhookSecret(duAnId int64) (string, error) {
 
 	return ketQua.WebhookSecret, nil
 }
+
+/**
+ * Lấy danh sách các cảnh báo sự cố theo trạng thái (active/resolved) và/hoặc dự án.
+ */
+func LayDanhSachCanhBao(trangThai string, duAnId int64) ([]ThongTinCanhBao, error) {
+	kh := LayKhachHangApi()
+	duongDan := "/alerts"
+
+	thamSo := make([]string, 0)
+	if trangThai != "" && trangThai != "all" {
+		thamSo = append(thamSo, fmt.Sprintf("status=%s", trangThai))
+	}
+	if duAnId > 0 {
+		thamSo = append(thamSo, fmt.Sprintf("project_id=%d", duAnId))
+	}
+
+	if len(thamSo) > 0 {
+		duongDan += "?" + strings.Join(thamSo, "&")
+	}
+
+	phanHoi, _, err := kh.GuiYeuCau("GET", duongDan, nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không thể lấy danh sách cảnh báo")
+	}
+
+	var danhSach []ThongTinCanhBao
+	if err := json.Unmarshal(phanHoi.Data, &danhSach); err != nil {
+		return nil, err
+	}
+
+	return danhSach, nil
+}
+
+/**
+ * Xác nhận đóng và khắc phục một cảnh báo sự cố (Yêu cầu vai trò Team Lead trở lên).
+ */
+func DongCanhBao(id int64) error {
+	kh := LayKhachHangApi()
+	duongDan := fmt.Sprintf("/alerts/%d/resolve", id)
+
+	phanHoi, _, err := kh.GuiYeuCau("POST", duongDan, nil, true)
+	if err != nil {
+		return err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return errors.New(phanHoi.Error.Message)
+		}
+		return errors.New("không thể đóng cảnh báo")
+	}
+
+	return nil
+}
+
+/**
+ * Lấy danh sách tất cả các nhóm làm việc trong hệ thống.
+ */
+func LayDanhSachNhom() ([]ThongTinNhom, error) {
+	kh := LayKhachHangApi()
+	phanHoi, _, err := kh.GuiYeuCau("GET", "/teams", nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không thể lấy danh sách nhóm")
+	}
+
+	var danhSach []ThongTinNhom
+	if err := json.Unmarshal(phanHoi.Data, &danhSach); err != nil {
+		return nil, err
+	}
+
+	return danhSach, nil
+}
+
+/**
+ * Xem thông tin chi tiết của một nhóm làm việc kèm danh sách thành viên và dự án trực thuộc.
+ */
+func LayChiTietNhom(id int64) (*ThongTinNhomChiTiet, error) {
+	kh := LayKhachHangApi()
+	duongDan := fmt.Sprintf("/teams/%d", id)
+
+	phanHoi, _, err := kh.GuiYeuCau("GET", duongDan, nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không tìm thấy nhóm yêu cầu")
+	}
+
+	var ketQua ThongTinNhomChiTiet
+	if err := json.Unmarshal(phanHoi.Data, &ketQua); err != nil {
+		return nil, err
+	}
+
+	return &ketQua, nil
+}
+
+/**
+ * Tạo một nhóm làm việc mới (Yêu cầu vai trò Admin).
+ */
+func TaoNhomMoi(ten, moTa string) (*ThongTinNhom, error) {
+	kh := LayKhachHangApi()
+	duLieuGui := map[string]string{
+		"name":        ten,
+		"description": moTa,
+	}
+
+	phanHoi, _, err := kh.GuiYeuCau("POST", "/teams", duLieuGui, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không thể tạo nhóm mới")
+	}
+
+	var nhomMoi ThongTinNhom
+	if err := json.Unmarshal(phanHoi.Data, &nhomMoi); err != nil {
+		return nil, err
+	}
+
+	return &nhomMoi, nil
+}
+
+/**
+ * Thêm hoặc gán vai trò thành viên vào một nhóm làm việc.
+ */
+func ThemThanhVienVaoNhom(nhomId int64, userId int64, vaiTro string) error {
+	kh := LayKhachHangApi()
+	duongDan := fmt.Sprintf("/teams/%d/members", nhomId)
+	duLieuGui := map[string]any{
+		"user_id": userId,
+		"role":    vaiTro,
+	}
+
+	phanHoi, _, err := kh.GuiYeuCau("POST", duongDan, duLieuGui, true)
+	if err != nil {
+		return err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return errors.New(phanHoi.Error.Message)
+		}
+		return errors.New("không thể thêm thành viên vào nhóm")
+	}
+
+	return nil
+}
+
+/**
+ * Xóa một thành viên ra khỏi nhóm làm việc.
+ */
+func XoaThanhVienKhoiNhom(nhomId int64, userId int64) error {
+	kh := LayKhachHangApi()
+	duongDan := fmt.Sprintf("/teams/%d/members/%d", nhomId, userId)
+
+	phanHoi, _, err := kh.GuiYeuCau("DELETE", duongDan, nil, true)
+	if err != nil {
+		return err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return errors.New(phanHoi.Error.Message)
+		}
+		return errors.New("không thể xóa thành viên khỏi nhóm")
+	}
+
+	return nil
+}
+
+/**
+ * Xóa toàn bộ nhóm làm việc (Yêu cầu vai trò Admin).
+ */
+func XoaNhom(id int64) error {
+	kh := LayKhachHangApi()
+	duongDan := fmt.Sprintf("/teams/%d", id)
+
+	phanHoi, _, err := kh.GuiYeuCau("DELETE", duongDan, nil, true)
+	if err != nil {
+		return err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return errors.New(phanHoi.Error.Message)
+		}
+		return errors.New("không thể xóa nhóm làm việc")
+	}
+
+	return nil
+}
+
+/**
+ * Lấy danh sách tất cả người dùng trong hệ thống (dùng để chọn thành viên đưa vào nhóm).
+ */
+func LayDanhSachNguoiDung() ([]ThongTinThanhVien, error) {
+	kh := LayKhachHangApi()
+	phanHoi, _, err := kh.GuiYeuCau("GET", "/users", nil, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if !phanHoi.Success {
+		if phanHoi.Error != nil {
+			return nil, errors.New(phanHoi.Error.Message)
+		}
+		return nil, errors.New("không thể lấy danh sách người dùng")
+	}
+
+	var danhSach []ThongTinThanhVien
+	if err := json.Unmarshal(phanHoi.Data, &danhSach); err != nil {
+		return nil, err
+	}
+
+	return danhSach, nil
+}
+
+
 
 

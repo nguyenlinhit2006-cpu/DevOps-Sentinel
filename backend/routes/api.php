@@ -39,9 +39,16 @@ Route::prefix('v1')->group(function () {
     // 4. Toàn bộ các API nghiệp vụ cốt lõi (Bảo vệ bằng JWT và Audit Log Middleware)
     Route::middleware(['jwt', 'audit'])->group(function () {
 
-        // Quản lý thông tin tài khoản
+        // Quản lý thông tin tài khoản & danh sách người dùng
         Route::get('/auth/me', [XacThucController::class, 'thongTinCaNhan']);
         Route::post('/auth/logout', [XacThucController::class, 'dangXuat']);
+        Route::get('/users', function () {
+            $danhSach = \App\Models\NguoiDung::select('id', 'name', 'email', 'role')->orderBy('id')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $danhSach,
+            ]);
+        });
 
         // Nhóm API Dự án (Projects)
         Route::prefix('projects')->group(function () {
