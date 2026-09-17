@@ -13,9 +13,34 @@ Hệ thống giám sát và quản lý trạng thái CI/CD Pipeline đa dự án
 
 ---
 
-## 2. Hướng dẫn Khởi chạy Môi trường Cục bộ (Local Setup)
+## 2. Hướng dẫn Khởi chạy Bằng Docker (All-in-One Container)
 
-### Cách 1: Sử dụng Nix Flake (Khuyến nghị)
+Toàn bộ hệ thống DevOps Sentinel (gồm **PostgreSQL 16 Database**, **Laravel 11 Backend API** và **Go WebAssembly Frontend**) đã được đóng gói trọn gói vào **1 Docker Image duy nhất**. Bạn chỉ cần 1 lệnh để chạy toàn bộ hệ thống trên bất kỳ nền tảng nào (Windows, Linux, macOS) mà không cần cài đặt PHP, Composer, Go hay Postgres:
+
+```bash
+# Bước 1: Biên dịch Docker image All-in-One
+docker build -t devops-sentinel:latest .
+
+# Bước 2: Khởi chạy Container
+docker run -d -p 3000:3000 -p 8000:8000 --name devops-sentinel devops-sentinel:latest
+
+# (Tùy chọn) Khởi chạy kèm Volume lưu trữ dữ liệu bền vững:
+# docker run -d -p 3000:3000 -p 8000:8000 -v devops_sentinel_data:/var/lib/postgresql/data --name devops-sentinel devops-sentinel:latest
+```
+
+Sau khi chạy lệnh trên, toàn bộ hệ thống sẽ tự động khởi động:
+- **Giao diện người dùng WebAssembly**: `http://localhost:3000`
+- **Máy chủ RESTful API Backend**: `http://localhost:8000`
+
+> [!TIP]
+> 📖 **Dành riêng cho người dùng Windows**: Xem hướng dẫn chi tiết từng bước với hình ảnh, xử lý lỗi CRLF và WSL 2 tại file:  
+> 👉 **[huong_dan_chay_bang_docker_tren_windows.md](file:///home/linh/DevOps-Sentinel/huong_dan_chay_bang_docker_tren_windows.md)**
+
+---
+
+## 3. Hướng dẫn Phát triển Cục bộ (Local Development Setup)
+
+### Cách 1: Sử dụng Nix Flake (Khuyến nghị cho Linux/macOS)
 Môi trường đã được khóa chính xác phiên bản của PHP 8.3, Composer, Go, PostgreSQL CLI và Make trong `flake.nix` & `flake.lock`:
 
 ```bash
@@ -23,7 +48,7 @@ Môi trường đã được khóa chính xác phiên bản của PHP 8.3, Compo
 nix develop
 ```
 
-### Cách 2: Sử dụng các công cụ có sẵn trên máy
+### Cách 2: Sử dụng các công cụ có sẵn trên máy host
 Yêu cầu hệ thống:
 - PHP >= 8.3 (kèm extension: `pdo_pgsql`, `pgsql`, `mbstring`, `curl`, `openssl`, `zip`, `bcmath`, `pcntl`)
 - Composer >= 2.7
@@ -32,7 +57,7 @@ Yêu cầu hệ thống:
 
 ---
 
-## 3. Các bước Khởi chạy Backend
+## 4. Các bước Khởi chạy Từng Dịch vụ Thủ công (Manual Setup)
 
 ### Bước 1: Khởi động Cơ sở dữ liệu PostgreSQL
 Sử dụng Docker Compose để khởi chạy container PostgreSQL 16 (được map vào cổng `5433:5432` trên máy host để không xung đột với các database khác):

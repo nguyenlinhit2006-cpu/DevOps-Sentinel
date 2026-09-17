@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"mime"
 	"net/http"
 )
 
@@ -9,6 +10,10 @@ import (
  * Máy chủ phát triển tĩnh phục vụ nạp ứng dụng Go WebAssembly tại cổng 3000.
  */
 func main() {
+	_ = mime.AddExtensionType(".wasm", "application/wasm")
+	_ = mime.AddExtensionType(".js", "application/javascript")
+	_ = mime.AddExtensionType(".css", "text/css")
+
 	thuMucTinh := http.FileServer(http.Dir("."))
 	http.Handle("/", thuMucTinh)
 
@@ -17,3 +22,4 @@ func main() {
 		log.Fatalf("Lỗi máy chủ frontend: %v", err)
 	}
 }
+
