@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Sentinel - Giám Sát Triển Khai Tự Động</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <!-- Khung ứng dụng chính được điều khiển hoàn toàn bởi Go WebAssembly -->
+  <div id="app">
+    <div class="app-loading-screen">
+      <div class="spinner"></div>
+      <h2>Đang nạp DevOps Sentinel WebAssembly...</h2>
+      <p>Hệ thống Go WASM đang khởi tạo bộ nhớ và kết nối DOM...</p>
+    </div>
+  </div>
+
+  <!-- Nạp glue code WebAssembly của Go runtime -->
+  <script src="wasm_exec.js"></script>
+  <script>
+    if (!WebAssembly.instantiateStreaming) {
+      WebAssembly.instantiateStreaming = async (resp, importObject) => {
+        const source = await (await resp).arrayBuffer();
+        return await WebAssembly.instantiate(source, importObject);
+      };
+    }
+
+    const go = new Go();
+    const wasmPath = "dist/main.wasm";
+
+    fetch(wasmPath)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Không tìm thấy file ${wasmPath}`);
+        }
+        return response.arrayBuffer();
+      })
+      .then(bytes => WebAssembly.instantiate(bytes, go.importObject))
+      .then(result => {
+        console.log("⚡ [DevOps Sentinel] WebAssembly binary nạp thành công!");
+        go.run(result.instance);
+      })
+      .catch(err => {
+        console.error("❌ Lỗi nạp Go WebAssembly:", err);
+        const app = document.getElementById("app");
+        if (app) {
+          app.innerHTML = `
+            <div class="wasm-load-error">
+              <h2>⚠️ Không thể nạp Go WebAssembly</h2>
+              <p>${err.message}</p>
+              <p><small>Hãy đảm bảo bạn đã biên dịch <code>make build-wasm</code> và phục vụ qua HTTP Server.</small></p>
+            </div>
+          `;
+        }
+      });
+  </script>
+</body>
+</html>

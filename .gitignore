@@ -13,6 +13,8 @@ vendor/
 bin/
 *.exe
 *.test
+*.wasm
+dist/
 
 # OS & IDEs
 .DS_Store
