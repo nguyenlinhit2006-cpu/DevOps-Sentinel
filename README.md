@@ -136,3 +136,30 @@ Toàn bộ **27 endpoints** của hệ thống Backend đã hoàn thành 100%, �
 | 26 | `GET` | `/api/v1/alerts` | `CanhBaoController@danhSach` | JWT Bearer | ✅ Khớp |
 | 27 | `POST` | `/api/v1/alerts/{id}/resolve` | `CanhBaoController@dongCanhBao` | JWT + `role:team_lead` | ✅ Khớp |
 | 28 | `GET` | `/api/v1/audit-logs` | `NhatKyController@danhSach` | JWT + `role:admin` | ✅ Khớp |
+
+---
+
+## 7. Hướng dẫn Khởi chạy Frontend Go WebAssembly
+
+Frontend của DevOps Sentinel được xây dựng hoàn toàn bằng **Go WebAssembly thuần** (`syscall/js` DOM Wrapper độc lập), không sử dụng bất kỳ thư viện hay framework JavaScript bên ngoài nào.
+
+### Bước 1: Biên dịch mã nguồn Go sang WebAssembly
+```bash
+make build-wasm
+# Lệnh sẽ sinh file: frontend/dist/main.wasm
+```
+
+### Bước 2: Khởi chạy Máy chủ Frontend Tĩnh
+```bash
+make dev-frontend
+# hoặc: cd frontend && go run ./cmd/server
+```
+Ứng dụng sẽ sẵn sàng phục vụ tại: **`http://localhost:3000`**
+
+### Trải nghiệm các tính năng đã hoàn thành (Phase 7 & Phase 8):
+1. **Đăng nhập nhanh 1-chạm**: Truy cập `http://localhost:3000/#/login`, bấm vào một trong các nút Demo (`Admin`, `Team Lead`, `Viewer`) để tự động điền thông tin và đăng nhập.
+2. **Dashboard Tổng quan thời gian thực**:
+   - 4 thẻ KPI động: Tổng số dự án, Lượt chạy hôm nay, Tỷ lệ thành công (%), Cảnh báo Sentinel active.
+   - Lưới danh sách dự án với ô tìm kiếm tức thì, thẻ thông tin lượt build gần nhất và huy hiệu trạng thái.
+   - Bảng hoạt động 8 lượt chạy gần đây nhất trên toàn hệ thống.
+   - Thanh Navbar hiển thị Avatar, Tên và Vai trò người dùng kèm hiệu ứng radar animation.
