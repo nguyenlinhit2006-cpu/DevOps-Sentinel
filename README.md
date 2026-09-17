@@ -33,7 +33,8 @@ Sau khi chạy lệnh trên, toàn bộ hệ thống sẽ tự động khởi đ
 - **Máy chủ RESTful API Backend**: `http://localhost:8000`
 
 > [!TIP]
-> 📖 **Dành riêng cho người dùng Windows**: Xem hướng dẫn chi tiết từng bước với hình ảnh, xử lý lỗi CRLF và WSL 2 tại file:  
+> 🪟 **Dành riêng cho người dùng Windows (1-Chạm)**:  
+> Bạn chỉ cần mở Docker Desktop và **nhấp đúp chuột vào file `run-windows.bat`** để hệ thống tự động build, khởi chạy và mở trình duyệt web. Chi tiết xem tại:  
 > 👉 **[huong_dan_chay_bang_docker_tren_windows.md](file:///home/linh/DevOps-Sentinel/huong_dan_chay_bang_docker_tren_windows.md)**
 
 ---

@@ -18,7 +18,29 @@ Trước khi bắt đầu, máy tính Windows của bạn cần có:
 
 ---
 
-## 2. Cách 1: Khởi chạy Nhanh Nhất (Chỉ 1 Container Duy Nhất)
+## 2. Cách 1: Khởi Chạy 1-Chạm Bằng File BAT (Khuyến Nghị - Nhanh Nhất)
+
+Trong thư mục dự án đã có sẵn file script tự động hóa **`run-windows.bat`**. Bạn chỉ cần:
+
+1. **Bật Docker Desktop** trên máy tính Windows (đảm bảo biểu tượng ở góc dưới màn hình có màu xanh lá cây).
+2. **Nhấp đúp chuột (Double-click)** vào file **`run-windows.bat`**.
+
+Script sẽ tự động hoàn toàn:
+- ✅ Kiểm tra trạng thái Docker Desktop.
+- ✅ Tự động build Docker Image `devops-sentinel:latest` nếu máy bạn chưa có.
+- ✅ Tự động tạo và khởi chạy Container `devops-sentinel` với volume lưu trữ dữ liệu an toàn.
+- ✅ Tự động mở trình duyệt web mặc định truy cập ngay: **`http://localhost:3000/#/login`**.
+
+> [!TIP]
+> **Cách tắt ứng dụng khi dùng xong:**
+> - Bạn chỉ cần nhấp đúp vào file **`stop-windows.bat`** để tạm dừng hệ thống.
+> - Lần tới khi muốn dùng lại, chỉ cần nhấp đúp lại file **`run-windows.bat`** là xong!
+
+---
+
+## 3. Cách 2: Khởi Chạy Thủ Công Bằng Dòng Lệnh (PowerShell / Terminal)
+
+Nếu bạn là lập trình viên muốn tự kiểm soát từng câu lệnh qua PowerShell hoặc Windows Terminal:
 
 Hình ảnh Docker **All-in-One** đã tích hợp sẵn:
 - **Cơ sở dữ liệu**: PostgreSQL 16 (tự động tạo database `devops_sentinel`).
@@ -38,19 +60,11 @@ docker build -t devops-sentinel:latest .
 ```
 
 ### Bước 3: Khởi chạy Container
-Chạy lệnh sau để khởi động toàn bộ hệ thống:
+Chạy lệnh sau để khởi động toàn bộ hệ thống (kèm volume lưu trữ dữ liệu bền vững):
 
 ```powershell
-# Chạy container và map các cổng 3000 và 8000 ra máy Windows
-docker run -d -p 3000:3000 -p 8000:8000 --name devops-sentinel devops-sentinel:latest
+docker run -d -p 3000:3000 -p 8000:8000 -v devops_sentinel_data:/var/lib/postgresql/data --name devops-sentinel devops-sentinel:latest
 ```
-
-> [!TIP]
-> **Lưu trữ dữ liệu bền vững (Persistent Data)**:
-> Nếu bạn muốn lưu giữ dữ liệu dự án và lượt build không bị mất khi xóa container, hãy gắn thêm volume:
-> ```powershell
-> docker run -d -p 3000:3000 -p 8000:8000 -v devops_sentinel_data:/var/lib/postgresql/data --name devops-sentinel devops-sentinel:latest
-> ```
 
 ### Bước 4: Kiểm tra trạng thái hoạt động
 Xem nhật ký khởi động của container:
@@ -69,7 +83,7 @@ Bạn có thể nhấn `Ctrl + C` để thoát màn hình xem log.
 
 ---
 
-## 3. Trải Nghiệm Ứng Dụng Trên Trình Duyệt
+## 4. Trải Nghiệm Ứng Dụng Trên Trình Duyệt
 
 Mở trình duyệt (Chrome, Edge, Firefox, Brave) trên Windows và truy cập:
 
@@ -86,16 +100,18 @@ Tại màn hình đăng nhập `http://localhost:3000/#/login`, hệ thống có
 
 ---
 
-## 4. Các Lệnh Quản Lý Thường Dùng Trên Windows
+## 5. Các Lệnh Quản Lý Thường Dùng Trên Windows
 
 ### Tạm dừng container:
 ```powershell
 docker stop devops-sentinel
+# Hoặc nhấp đúp file stop-windows.bat
 ```
 
 ### Khởi động lại container đã dừng:
 ```powershell
 docker start devops-sentinel
+# Hoặc nhấp đúp file run-windows.bat
 ```
 
 ### Xem log thời gian thực:
@@ -116,7 +132,7 @@ docker exec -it devops-sentinel bash
 
 ---
 
-## 5. Xử Lý Các Vấn Đề Thường Gặp (Troubleshooting trên Windows)
+## 6. Xử Lý Các Vấn Đề Thường Gặp (Troubleshooting trên Windows)
 
 ### 1. Lỗi xung đột cổng `3000` hoặc `8000`
 - **Nguyên nhân**: Cổng 3000 hoặc 8000 đang được một ứng dụng khác (Node.js, Grafana...) sử dụng trên máy host Windows.
