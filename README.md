@@ -136,6 +136,7 @@ Toàn bộ **27 endpoints** của hệ thống Backend đã hoàn thành 100%, �
 | 26 | `GET` | `/api/v1/alerts` | `CanhBaoController@danhSach` | JWT Bearer | ✅ Khớp |
 | 27 | `POST` | `/api/v1/alerts/{id}/resolve` | `CanhBaoController@dongCanhBao` | JWT + `role:team_lead` | ✅ Khớp |
 | 28 | `GET` | `/api/v1/audit-logs` | `NhatKyController@danhSach` | JWT + `role:admin` | ✅ Khớp |
+| 29 | `GET` | `/api/v1/users` | Tuyến lấy danh sách tài khoản người dùng | JWT Bearer | ✅ Bổ sung Phase 10 |
 
 ---
 
@@ -156,10 +157,27 @@ make dev-frontend
 ```
 Ứng dụng sẽ sẵn sàng phục vụ tại: **`http://localhost:3000`**
 
-### Trải nghiệm các tính năng đã hoàn thành (Phase 7 & Phase 8):
-1. **Đăng nhập nhanh 1-chạm**: Truy cập `http://localhost:3000/#/login`, bấm vào một trong các nút Demo (`Admin`, `Team Lead`, `Viewer`) để tự động điền thông tin và đăng nhập.
-2. **Dashboard Tổng quan thời gian thực**:
+### Trải nghiệm toàn bộ các phân hệ chức năng:
+1. **Đăng nhập nhanh 1-chạm (`#/login`)**: Truy cập `http://localhost:3000/#/login`, bấm vào một trong các nút Demo (`Admin`, `Team Lead`, `Viewer`) để tự động điền thông tin và đăng nhập.
+2. **Dashboard Tổng quan thời gian thực (`#/dashboard`)**:
    - 4 thẻ KPI động: Tổng số dự án, Lượt chạy hôm nay, Tỷ lệ thành công (%), Cảnh báo Sentinel active.
    - Lưới danh sách dự án với ô tìm kiếm tức thì, thẻ thông tin lượt build gần nhất và huy hiệu trạng thái.
    - Bảng hoạt động 8 lượt chạy gần đây nhất trên toàn hệ thống.
-   - Thanh Navbar hiển thị Avatar, Tên và Vai trò người dùng kèm hiệu ứng radar animation.
+   - Thanh Navbar hiển thị Avatar, Tên, Huy hiệu vai trò người dùng kèm hiệu ứng radar animation và nút công tắc **"🟢 Live (4s)"**.
+3. **Chi tiết Dự án & Cấu hình Webhook (`#/projects/{id}`)**:
+   - Thẻ hiển thị Payload URL và Webhook Secret (HMAC SHA-256) với nút ẩn/hiện, sao chép và nút sinh lại secret.
+   - Lịch sử lượt chạy pipeline với bộ lọc theo Nhánh, Trạng thái và thanh Phân trang (Pagination).
+4. **Trình xem Log Terminal Console Monospace (`#/runs/{id}`)**:
+   - Mô phỏng cửa sổ dòng lệnh Terminal chuẩn developer với các chấm màu MacOS.
+   - Đánh số thứ tự từng dòng, tô màu cú pháp (Syntax Highlighting) tự động cho lỗi, cảnh báo và thành công.
+   - Nút sao chép log nhanh vào clipboard.
+5. **Quản lý Cảnh báo Sentinel Sự cố (`#/alerts`)**:
+   - Bộ lọc tabs giữa "Cảnh Báo Đang Mở (Active)" và "Lịch Sử Đã Đóng (Resolved)".
+   - Thẻ Hazard Alert đỏ rực đập mạch (`pulse-danger`), hiển thị số lần fail liên tiếp, commit lỗi và liên kết trực tiếp sang console log.
+   - Nút "✓ Xác nhận Đóng cảnh báo" dành cho vai trò Team Lead và Admin.
+6. **Quản lý Nhóm & Phân bổ Thành viên (`#/teams` và `#/teams/{id}`)**:
+   - Danh sách nhóm làm việc với số lượng thành viên, dự án trực thuộc và form tạo nhóm mới cho Admin.
+   - Bảng thành viên nhóm kèm vai trò (`Team Lead` / `Viewer`), form thêm thành viên và danh sách dự án CI/CD trực thuộc nhóm.
+7. **Cơ chế Cập nhật Realtime Polling (4 giây)**:
+   - Tự động đồng bộ số liệu nền mỗi 4s mà không gây gián đoạn hay tải lại trang.
+   - Nút bật/tắt tiện lợi ngay trên thanh Navbar.
